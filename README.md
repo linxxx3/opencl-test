@@ -8,6 +8,8 @@ Simple OpenCL tests.
 
 * OS: Ubuntu 18.04
 
+* NVidia driver: `NVIDIA-Linux-aarch64-450.80.02.run`
+
 * Packages:
 
 ```
