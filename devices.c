@@ -7,8 +7,12 @@
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
+
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 #endif
+
+const int CL_DEVICE_PCI_BUS_ID_NV = 0x4008;
 
 struct platform_data_item {
     int id;
@@ -82,6 +86,10 @@ int main() {
             clGetDeviceInfo(devices[j], CL_DEVICE_NAME, valueSize, value, NULL);
             printf("%d. Device: %s\n", j+1, value);
             free(value);
+
+            unsigned bus_id = 0;
+            clGetDeviceInfo(devices[j], CL_DEVICE_PCI_BUS_ID_NV, sizeof(unsigned), &bus_id, NULL);
+            printf(" PCI bus id: %d\n", bus_id);
  
             // print hardware device version
             clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, 0, NULL, &valueSize);

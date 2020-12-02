@@ -10,7 +10,11 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
+
+const int CL_DEVICE_PCI_BUS_ID_NV = 0x4008;
 
 struct platform_data_item {
     int id;
@@ -174,6 +178,16 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    unsigned bus_id = 0;
+    err = clGetDeviceInfo(device_id, CL_DEVICE_PCI_BUS_ID_NV, sizeof(unsigned), &bus_id, NULL);
+    if (err != CL_SUCCESS)
+    {
+        printf("Error: Failed to get device IDs, code %d!\n", err);
+        return EXIT_FAILURE;
+    } else {
+	printf("Get device bus id: %d\n", bus_id);
+    }
+
     props[1] = (cl_context_properties)platforms[0];
     // Create a compute context
     //
@@ -204,7 +218,8 @@ int main(int argc, char** argv)
 
     // Build the program executable
     //
-    err = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
+    const char *options = "-cl-std=CL1.2";
+    err = clBuildProgram(program, 1, &device_id, options, NULL, NULL);
     if (err != CL_SUCCESS)
     {
         size_t len;
