@@ -12,7 +12,9 @@
 #include <CL/cl.h>
 #endif
 
-const int CL_DEVICE_PCI_BUS_ID_NV = 0x4008;
+#ifndef CL_DEVICE_PCI_BUS_ID_NV
+#define CL_DEVICE_PCI_BUS_ID_NV  (0x4008)
+#endif
 
 struct platform_data_item {
     int id;

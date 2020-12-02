@@ -14,7 +14,9 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
-const int CL_DEVICE_PCI_BUS_ID_NV = 0x4008;
+#ifndef CL_DEVICE_PCI_BUS_ID_NV
+#define CL_DEVICE_PCI_BUS_ID_NV  (0x4008)
+#endif
 
 struct platform_data_item {
     int id;
@@ -163,7 +165,9 @@ int main(int argc, char** argv)
 
     cl_uint platformCount = 0;
     cl_platform_id* platforms;
-    cl_device_id device_id;             // compute device id
+    int deviceCount = 0;
+    cl_device_id* devices;
+    cl_device_id device_id;
     cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, 0, 0 };
     cl_context context;                 // compute context
     cl_command_queue commands;          // compute command queue
@@ -205,15 +209,21 @@ int main(int argc, char** argv)
         }
     }
 
+    // get device number
+    clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 0, NULL, &deviceCount);
+    printf("Get GPU device number: %d\n", deviceCount);
+    devices = (cl_device_id*) malloc(sizeof(cl_device_id) * deviceCount);
+
     // Connect to a compute device
     //
     int gpu = 1;
-    err = clGetDeviceIDs(platforms[0], gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, 1, &device_id, NULL);
+    err = clGetDeviceIDs(platforms[0], gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, deviceCount, devices, NULL);
     if (err != CL_SUCCESS)
     {
         printf("Error: Failed to get device IDs, code %d!\n", err);
         return EXIT_FAILURE;
     }
+    device_id = devices[2];
     print_info(device_id);
 
     props[1] = (cl_context_properties)platforms[0];
@@ -222,7 +232,7 @@ int main(int argc, char** argv)
     context = clCreateContext(props, 1, &device_id, NULL, NULL, &err);
     if (!context)
     {
-        printf("Error: Failed to create a compute context!\n");
+        printf("Error: Failed to create a compute context, code %d\n", err);
         return EXIT_FAILURE;
     }
 
@@ -356,6 +366,7 @@ int main(int argc, char** argv)
     clReleaseKernel(kernel);
     clReleaseCommandQueue(commands);
     clReleaseContext(context);
+    free(devices);
 
     return 0;
 }
