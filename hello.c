@@ -223,7 +223,7 @@ int main(int argc, char** argv)
         printf("Error: Failed to get device IDs, code %d!\n", err);
         return EXIT_FAILURE;
     }
-    device_id = devices[2];
+    device_id = devices[0];
     print_info(device_id);
 
     props[1] = (cl_context_properties)platforms[0];
