@@ -113,6 +113,43 @@ cleanup:
         free(data);
 }
 
+void print_info(cl_device_id device) {
+    char* value;
+    size_t valueSize;
+    
+    // print device name
+    clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &valueSize);
+    value = (char*) malloc(valueSize);
+    clGetDeviceInfo(device, CL_DEVICE_NAME, valueSize, value, NULL);
+    printf("Device: %s\n", value);
+    free(value);
+
+    unsigned bus_id = 0;
+    clGetDeviceInfo(device, CL_DEVICE_PCI_BUS_ID_NV, sizeof(unsigned), &bus_id, NULL);
+    printf(" PCI bus id: %d\n", bus_id);
+ 
+    // print hardware device version
+    clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, NULL, &valueSize);
+    value = (char*) malloc(valueSize);
+    clGetDeviceInfo(device, CL_DEVICE_VERSION, valueSize, value, NULL);
+    printf(" %d Hardware version: %s\n", 1, value);
+    free(value);
+ 
+    // print software driver version
+    clGetDeviceInfo(device, CL_DRIVER_VERSION, 0, NULL, &valueSize);
+    value = (char*) malloc(valueSize);
+    clGetDeviceInfo(device, CL_DRIVER_VERSION, valueSize, value, NULL);
+    printf(" %d Software version: %s\n", 2, value);
+    free(value);
+ 
+    // print c version supported by compiler for device
+    clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &valueSize);
+    value = (char*) malloc(valueSize);
+    clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, valueSize, value, NULL);
+    printf(" %d OpenCL C version: %s\n", 3, value);
+    free(value);
+}
+
 int main(int argc, char** argv)
 {
     int err;                            // error code returned from api calls
@@ -177,16 +214,7 @@ int main(int argc, char** argv)
         printf("Error: Failed to get device IDs, code %d!\n", err);
         return EXIT_FAILURE;
     }
-
-    unsigned bus_id = 0;
-    err = clGetDeviceInfo(device_id, CL_DEVICE_PCI_BUS_ID_NV, sizeof(unsigned), &bus_id, NULL);
-    if (err != CL_SUCCESS)
-    {
-        printf("Error: Failed to get device IDs, code %d!\n", err);
-        return EXIT_FAILURE;
-    } else {
-	printf("Get device bus id: %d\n", bus_id);
-    }
+    print_info(device_id);
 
     props[1] = (cl_context_properties)platforms[0];
     // Create a compute context
